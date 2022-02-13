@@ -5,7 +5,7 @@
 *  Description: Common Javascript
 *  Author: chieri0611
 *  Create: 2022/02/11
-*  Update: 2022/02/11
+*  Update: 2022/02/13
 *
 ********************************************************************** */
 
@@ -146,10 +146,13 @@ function showDialog(content, title, id, btntext, btntype, btnevent, modal, close
         var btnelem = document.createElement('button');
         btnelem.textContent = String(element);
         if(btntype.length > idx) {
-            if(btntype[idx] == 1) btnelem.className = "exec_button";
+            switch(btntype[idx]) {
+            case 1: btnelem.className = "exec_button"; break;
+            case 2: btnelem.className = "cancel_button"; break;
+            }
         }
         if(btnevent.length > idx) {
-            btnelem.setAttribute("onclick", btnevent[idx] !== null ? String(btnevent[idx]) : "closeDialog()");
+            btnelem.setAttribute("onclick", btnevent[idx] != null ? String(btnevent[idx]) : "closeDialog()");
         } else {
             btnelem.setAttribute("onclick", "closeDialog()");
         }
@@ -241,11 +244,11 @@ function closeListDialog(id) {
 
 /* showProgressDialog
 ====================================================================== */
-function showProgressDialog(title, description) {
+function showProgressDialog(title, description, cancelbutton, cancelevent) {
     if(document.getElementById("loadwindow") != null) return;
 
     var dialog = document.createElement('div');
-    dialog.className = "loadwindow"; dialog.id = "loadwindow";
+    dialog.className = "loadwindow hidden"; dialog.id = "loadwindow";
 
     var title_elem = document.createElement('div'); title_elem.className = "title";
     if(title != null) title_elem.textContent = String(title);
@@ -262,7 +265,20 @@ function showProgressDialog(title, description) {
     if(description != null) desc_elem.textContent = String(description);
     dialog.appendChild(desc_elem);
 
-    dialog = document.body.appendChild(dialog);  
+    if(cancelbutton != null) {
+        var foot_elem = document.createElement('footer');
+        var btnelem = document.createElement('button');
+        btnelem.className = "cancel_button";
+        btnelem.textContent = String(cancelbutton);
+        btnelem.setAttribute("onclick", cancelevent != null ? String(cancelevent) : "closeProgressDialog()");
+        foot_elem.appendChild(btnelem); dialog.appendChild(foot_elem);
+    }
+
+    var overlay = document.createElement('div');
+    overlay.className = "overlay loading"; document.body.appendChild(overlay)
+
+    dialog = document.body.appendChild(dialog);
+    setTimeout(function showdlg() { dialog.className = "loadwindow"; }, 0);
 }
 
 
@@ -291,7 +307,14 @@ function setProgressValue(prog_value, title, description) {
 function closeProgressDialog() {
     var dialog = document.getElementById("loadwindow");
     if(dialog == null) return;
-    document.body.removeChild(dialog);  
+
+    var overlay = document.getElementsByClassName("overlay loading"); 
+
+    dialog.className = "loadwindow hidden";
+    setTimeout(function closedlg() {
+      if(overlay.length > 0) document.body.removeChild(overlay[0]);
+        document.body.removeChild(dialog);  
+    }, 100)  
 }
 
 
