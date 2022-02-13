@@ -1,11 +1,53 @@
 {
-  "update": "2022/02/08",
+  "update": "2022/02/13",
   "content": [
     {
       "title": "スクフェス",
       "id": "llsif",
       "ref": "/llsif/",
       "menu": [
+        {
+          "title": "Coming Soon...",
+          "id": "menu1",
+          "ref": "",
+          "icon": "",
+          "enable": false
+        },
+        {
+          "title": "Coming Soon...",
+          "id": "menu2",
+          "ref": "",
+          "icon": "",
+          "enable": false
+        },
+        {
+          "title": "Coming Soon...",
+          "id": "menu3",
+          "ref": "",
+          "icon": "",
+          "enable": false
+        },
+        {
+          "title": "Coming Soon...",
+          "id": "menu4",
+          "ref": "",
+          "icon": "",
+          "enable": false
+        },
+        {
+          "title": "Coming Soon...",
+          "id": "menu5",
+          "ref": "",
+          "icon": "",
+          "enable": false
+        },
+        {
+          "title": "Coming Soon...",
+          "id": "menu6",
+          "ref": "",
+          "icon": "",
+          "enable": false
+        }
       ]
     },
     {
@@ -16,7 +58,7 @@
         {
           "title": "ファン数計算機",
           "id": "fungaincalc",
-          "ref": "/imascgstage/fungaincalc/index.html",
+          "ref": "/imascgstage/fungaincalc/",
           "icon": "/imascgstage/fungaincalc/menu_icon.png",
           "enable": true
         },
