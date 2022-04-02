@@ -164,9 +164,9 @@ function loadMenuButton(id) {
   xhr.open('GET', rootdir + "/menu.json", true);
   xhr.setRequestHeader('Content-Type', 'application/json');
   if(nocache) {
-    xhr.serRequestHeader('Pragma', 'no-cache');
-    xhr.serRequestHeader('Cache-Control', 'no-cache');
-    xhr.serRequestHeader('If-Modified-Since', 'Thu, 01 Jun 1970 00:00:00 GMT');
+    xhr.setRequestHeader('Pragma', 'no-cache');
+    xhr.setRequestHeader('Cache-Control', 'no-cache');
+    xhr.setRequestHeader('If-Modified-Since', 'Thu, 01 Jun 1970 00:00:00 GMT');
   }
 
   function errorMenu(errtext) {
@@ -797,9 +797,9 @@ function loadAllFiles(files, nocache, success_func) {
     };
     xhr.open("GET", path);
     if(nocache) {
-      xhr.serRequestHeader('Pragma', 'no-cache');
-      xhr.serRequestHeader('Cache-Control', 'no-cache');
-      xhr.serRequestHeader('If-Modified-Since', 'Thu, 01 Jun 1970 00:00:00 GMT');
+      xhr.setRequestHeader('Pragma', 'no-cache');
+      xhr.setRequestHeader('Cache-Control', 'no-cache');
+      xhr.setRequestHeader('If-Modified-Since', 'Thu, 01 Jun 1970 00:00:00 GMT');
     }
     xhr.send(); return xhr;
   });
