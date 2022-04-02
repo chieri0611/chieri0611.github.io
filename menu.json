@@ -1,5 +1,5 @@
-{
-  "update": "2022/02/13",
+﻿{
+  "update": "2022/04/03",
   "content": [
     {
       "title": "スクフェス",
@@ -7,11 +7,11 @@
       "ref": "/llsif/",
       "menu": [
         {
-          "title": "Coming Soon...",
-          "id": "menu1",
-          "ref": "",
-          "icon": "",
-          "enable": false
+          "title": "部員一覧",
+          "id": "card",
+          "ref": "/llsif/card/",
+          "icon": "/llsif/card/menu_icon.png",
+          "enable": true
         },
         {
           "title": "Coming Soon...",
