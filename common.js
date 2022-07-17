@@ -5,7 +5,7 @@
 *  Description: Common Javascript
 *  Author: chieri0611
 *  Create: 2022/02/11
-*  Update: 2022/04/03
+*  Update: 2022/07/17
 *
 ********************************************************************** */
 
@@ -35,14 +35,18 @@
 *  Array
 *    [-] sumArray
 *    [-] choose
+*    [-] fillObject
 *
 *  Element
 *    [-] hasClass
 *    [-] isElement
+*    [-] removeElement
+*    [-] removeChildElements
 *    [-] toggleClass
 *    [-] toggleDisable
 *    [-] getRadioValue
 *    [-] initSpinBox
+*    [-] replaceCheckBox
 *    [-] initAllCheckBox
 *    [-] allChecked
 *    [-] getCheckedValues
@@ -50,6 +54,12 @@
 *
 *  Object
 *    [-] cloneObject
+*    [-] setMatrixObject
+*    [-] sortMatrixObject
+*
+*  JSON
+*    [-] compressJSON
+*    [-] decompressJSON
 *
 *  File
 *    [-] loadAllFiles
@@ -58,6 +68,7 @@
 *
 *  Others
 *    [-] getURLQueryParam
+*    [-] replaceURLQueryParam
 *  
 ====================================================================== */
 
@@ -81,6 +92,25 @@ if(!Object.values) { Object.values = function(obj) {
 if(!Object.entries) { Object.entries = function(obj) {
   return Object.keys(obj).map(function(key) { return [key, obj[key]]; });
 }}
+
+if(typeof Object.assign !== 'function') {
+  Object.defineProperty(Object, "assign", {
+    value: function assign(target, varArgs) {
+      'use strict';
+      if(target === null || target === undefined) throw new TypeError('Cannot convert undefined or null to object');
+      var to = Object(target);
+      for(var i = 1; i < arguments.length; i++) {
+        var nextsrc = arguments[i];
+        if(nextsrc === null || nextsrc === undefined) continue;
+        for(var nextkey in nextsrc) {
+          if(Object.prototype.hasOwnProperty.call(nextsrc, nextkey)) to[nextkey] = nextsrc[nextkey];
+        }
+      }
+      return to;
+    },
+    writable: true, configurable: true
+  });
+}
 
 if(!Array.prototype.fill) {
   Object.defineProperty(Array.prototype, 'fill', {
@@ -138,6 +168,25 @@ if(!Array.prototype.findIndex) {
     configurable: true,
     writable: true
   });
+}
+
+if(!String.prototype.repeat) {
+  String.prototype.repeat = function(count) {
+    'use_strict';
+    if(this == null) throw new TypeError('can\'t convert ' + this + ' to object');
+    var str = '' + this;
+    count = +count; if(count != count) count = 0;
+    if(count < 0) throw new RangeError('repert count must be non-negative');
+    if(count == Infinity) throw new RangeError('repert count must be less than infinity');
+    count = Math.floor(count);
+    if(str.length == 0 || count == 0) return '';
+    if(str.length * count >= 1 << 28) throw new RangeError('repert count must not overflow maximum string size');
+    var maxCount = str.length * count;
+    count = Math.floor(Math.log(count) / Math.log(2));
+    while(count) { str += str; count--; }
+    str += str.substring(0, maxCount - str.length);
+    return str;
+  }
 }
 
 
@@ -238,7 +287,12 @@ function showDialog(content, title, id, btntext, btntype, btnevent, modal, close
   if(title) {
     var head_elem = document.createElement('header');
     var title_elem = document.createElement('div');
-    title_elem.className = "title"; title_elem.textContent = title;
+    title_elem.className = "title";
+    if(isElement(title)) {
+      title_elem.appendChild(title);
+    } else {
+      title_elem.textContent = title;
+    }
     head_elem.appendChild(title_elem); dialog.appendChild(head_elem);
   }
 
@@ -534,6 +588,13 @@ function choose(index_num, value1) {
   return arguments[index_num];
 }
 
+/* fillObject
+====================================================================== */
+function fillObject(ary, obj) {
+  ary.fill(null); return ary.map(function(elem) { return cloneObject(obj); });
+}
+
+
 
 /* ----------------------------------------------------------------------
 *  Element
@@ -556,6 +617,14 @@ function isElement(obj) {
     return obj.nodeName && (obj.nodeType == 1 || obj.nodeType == 11) && typeof obj === "object"
   }
 }
+
+/* removeElement
+====================================================================== */
+function removeElement(obj) { obj.parentNode.removeChild(obj); }
+
+/* removeChildElements
+====================================================================== */
+function removeChildElements(obj) { while(obj.firstChild) obj.removeChild(obj.firstChild); }
 
 /* toggleClass
 ====================================================================== */
@@ -627,7 +696,9 @@ function initSpinBox(inputbox, spinup, spindown) {
     if(!isNaN(spinmin) && spinvalue < spinmin) input.value = spinmin;
     else if(!isNaN(spinmax) && spinvalue > spinmax) input.value = spinmax;
     else input.value = spinvalue;
-    e_valuechange(input, upbtn, downbtn); input.onchange();
+    e_valuechange(input, upbtn, downbtn);
+    if(spinvalue == (increment ? spinmax : spinmin)) e_spinend();
+    input.onchange();
   }
 
   function e_valuechange(input, upbtn, downbtn) {
@@ -672,6 +743,26 @@ function initSpinBox(inputbox, spinup, spindown) {
   e_valuechange(inputbox, spinup, spindown);
 }
 
+
+/* replaceCheckBox
+====================================================================== */
+function replaceCheckBox(groupname) {
+  var checkelems = document.getElementsByName(groupname);
+  for(var i = 0; i < checkelems.length; i++) {
+    var elem = checkelems[i];
+    if(elem.parentNode.className == "checkbox" || elem.type != "checkbox") continue;
+    if(elem.id == null) continue;
+    const lbltext = elem.hasAttribute('data-caption') ? elem.dataset.caption : '';
+    const elemval = elem.hasAttribute('value') ? elem.value : '';
+    elem.outerHTML =
+      '<div class="checkbox">' +
+        '<input type="checkbox" name="'+ elem.name + '" value="' + elemval + '" id="' + elem.id + '" />' +
+        '<label for="' + elem.id + '">' + lbltext + '</label>'
+      '</div>';
+  }
+}
+
+
 /* initAllCheckBox
 ====================================================================== */
 function initAllCheckBox(groupname) {
@@ -695,7 +786,7 @@ function initAllCheckBox(groupname) {
     if(checkall) checkall.checked = state;
   }
 
-  checkelems = document.getElementsByName(groupname);
+  var checkelems = document.getElementsByName(groupname);
   for(var i = 0; i < checkelems.length; i++) {
     if(checkelems[i].value == 'all') {
       checkelems[i].addEventListener('change', function(e) { e_allcheck(this.name, this.checked); });
@@ -777,6 +868,73 @@ function setLongPressEvent(elem, sec, longpress_event) {
 /* cloneObject
 ===================================================================== */
 function cloneObject(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+/* setMatrixObject
+===================================================================== */
+function setMatrixObject(obj, criteria_row, criteria_column) {
+  if(!Array.isArray(obj) || !Array.isArray(criteria_row)) return;
+
+  var mtrxobj = new Array(criteria_row.length);
+
+  if(Array.isArray(criteria_row[0])) {
+    for(var i = 0; i < mtrxobj.length; i++) { mtrxobj[i] = fillObject(new Array(criteria_row[0].length), []); }
+
+    obj.forEach(function(elem) {
+      for(var r = 0; r < criteria_row.length; r++) {
+        for(var c = 0; c < criteria_row[r].length; c++) {
+          var matchflag = true, criteria_data = criteria_row[r][c];
+          for(var prop in criteria_data) {
+            if(!elem.hasOwnProperty(prop)) { matchflag = false; break; }
+            if(elem[prop] != criteria_data[prop]) { matchflag = false; break; }
+          }
+          if(matchflag) mtrxobj[r][c].push(cloneObject(elem));
+        }
+      }
+    });
+
+  } else {
+    if(!Array.isArray(criteria_column)) return;
+    for(var i = 0; i < mtrxobj.length; i++) { mtrxobj[i] = fillObject(new Array(criteria_column.length), []); }
+
+    obj.forEach(function(elem) {
+      criteria_row.forEach(function(rowelem, r) {
+        var matchflag = true;
+        for(var prop in rowelem) {
+          if(!elem.hasOwnProperty(prop)) { matchflag = false; break; }
+          if(elem[prop] != rowelem[prop]) { matchflag = false; break; }
+        }
+        if(!matchflag) return;
+
+        criteria_column.forEach(function(colelem, c) {
+          matchflag = true;
+          for(var prop in colelem) {
+            if(!elem.hasOwnProperty(prop)) { matchflag = false; break; }
+            if(elem[prop] != colelem[prop]) { matchflag = false; break; }
+          }
+          if(matchflag) mtrxobj[r][c].push(cloneObject(elem));
+        });
+      });
+    });
+  }
+  return mtrxobj;
+}
+
+/* sortMatrixObject
+===================================================================== */
+function sortMatrixObject() {
+}
+
+
+
+/* ----------------------------------------------------------------------
+*  JSON
+---------------------------------------------------------------------- */
+
+/* compressJSON
+===================================================================== */
+
+/* decompressJSON
+===================================================================== */
 
 
 
@@ -880,4 +1038,15 @@ function getURLQueryParam() {
     obj[kv[0]] = kv.length > 1 ? kv[1] : null;
   }
   return obj;
+}
+
+/* replaceURLQueryParam
+===================================================================== */
+function replaceURLQueryParam(obj) {
+  var newquery = Object.entries(obj).map(function(elem) { 
+    return elem[1] == null ? elem[0] : elem[0] + '=' + elem[1];
+  });
+  newquery = newquery.join('&');
+  if(newquery != '') newquery = '?' + newquery;
+  history.replaceState(null, null, location.href.replace(location.search, newquery));
 }
