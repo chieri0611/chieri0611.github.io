@@ -1,5 +1,5 @@
 ﻿{
-  "update": "2022/04/03",
+  "update": "2022/07/17",
   "content": [
     {
       "title": "スクフェス",
@@ -14,11 +14,11 @@
           "enable": true
         },
         {
-          "title": "Coming Soon...",
-          "id": "menu2",
-          "ref": "",
-          "icon": "",
-          "enable": false
+          "title": "ブスリピ性能表",
+          "id": "boostrpt",
+          "ref": "/llsif/boostrpt/",
+          "icon": "/llsif/boostrpt/menu_icon.png",
+          "enable": true
         },
         {
           "title": "Coming Soon...",
